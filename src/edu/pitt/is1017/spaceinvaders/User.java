@@ -4,23 +4,64 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
-
+/**
+ * This class creates an object of type User and stores information about the user in an external database
+ * @author timmeehan
+ *
+ */
 public class User {
 	
-	private int userID = 8;
+	//class's private prooerties
+	private int userID;
 	private String lastName;
 	private String firstName;
 	private String email;
 	private String password;
 	private boolean loggedIn = false;
 	
+	/**
+	 * User class constructor whose only inputed value is the user's unique user ID
+	 * This ID is used to load all other properties based on info form the database
+	 * @param userID
+	 */
 	public User(int userID) {
-		this.userID = userID;
-		//retrieve data from database corresponding to received userID
-		//and set appropriate class properties
 		
-	}
+		//create String that holds MySQL query using inputed email and password
+		String selectString = "SELECT * FROM users WHERE userID = '" 
+			+ userID + "';";
+		
+		//create a DbUtilities object
+		DbUtilities alienDB = new DbUtilities();
+		
+		//create a ResultSet Object holding the results of the MySQL query
+		ResultSet userResult = alienDB.getResultSet(selectString);
+		try {
+			if(userResult.next()){
+						
+				this.email = userResult.getString("email");
+				this.loggedIn = true;
+				this.userID = userID;
+				this.firstName = userResult.getString("firstName");
+				this.lastName = userResult.getString("lastName");
+					
+			}// end of if block
+				
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//close connection with database
+		alienDB.closeConnection();
+				
+	}//end of constructor
 	
+	/**
+	 * This class constructor takes an inputed email and password
+	 *  and checks to see if these value exist in the database.
+	 *  If they do the user's information is added to the object's properties
+	 * @param email user's inputed email address
+	 * @param password user's inputed password
+	 */
 	public User(String email, String password) {
 		
 		//create String that holds MySQL query using inputed email and password
@@ -33,8 +74,9 @@ public class User {
 		//create a ResultSet Object holding the results of the MySQL query
 		ResultSet userResult = alienDB.getResultSet(selectString);
 		try {
+			//checks to see if the user's information was found
 			if(userResult.next()){
-				
+				//fills in user info into object's properties
 				this.email = email;
 				this.password = password;
 				this.loggedIn = true;
@@ -42,11 +84,16 @@ public class User {
 				this.firstName = userResult.getString("firstName");
 				this.lastName = userResult.getString("lastName");
 				
+				//display confirmation message
 				JOptionPane.showMessageDialog(null, "Welcome back, "+ this.firstName +"!");
 				
 			}// end of if block
-			else{
+			else{//executes if email or password is not found in database
 				
+				//sets logged in property to false
+				this.loggedIn = false;
+				
+				//displays error message
 				JOptionPane.showMessageDialog(null, "Sorry, that email or password was not found");
 				
 			}//end of else block
@@ -58,7 +105,7 @@ public class User {
 		alienDB.closeConnection();
 		
 		
-	}
+	}//end of constructor
 	
 	/**
 	 * This constructor is used to create a new user and add their information to the user
@@ -90,20 +137,28 @@ public class User {
 		
 		//System.out.println(insertString);
 		
-	}
+	}//end of constructor
 	
+	/**
+	 * this methods updates the user info found on the database to match the object's private properties
+	 */
 	public void saveUserInfo(){
-		String updateString = "";
-		updateString = "UPDATE alieninvasion.users "
+		 
+		//create a string that contains the MySQL statement
+		 String updateString = "UPDATE alieninvasion.users "
 				+ "SET lastName = '" + this.lastName +"' , firstName = '" + this.firstName + "' , email = '"
 				+ this.email +"' , password = MD5('"+ this.password + "') "
 				+ "WHERE userID = " + this.userID + ";";
 		
+		 //creates a DbUtilities object
 		DbUtilities alienDB = new DbUtilities();
+		
+		//execute query using MySQL statement string named updateString
 		alienDB.executeQuery(updateString);
 		
 		//System.out.println(updateString);
-	}
+		
+	}//end of method
 	
 	//Class getters and setters
 	public String getLastName() {

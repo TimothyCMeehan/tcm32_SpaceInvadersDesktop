@@ -12,6 +12,7 @@ import java.sql.Statement;
  * 2. For executing UPDATE, INSERT, DELETE queries 
  * 3. For building tables to populate data grids (JTable)
  * @author Dmitriy Babichenko, modified by Daniel Murray
+ * close connection method added by Timothy Meehan
  * @version 1.1
  */
 public class DbUtilities {
@@ -109,6 +110,9 @@ public class DbUtilities {
         return false;
     }
     
+    /**
+     * method closes connection with database
+     */
     public void closeConnection(){
     	try {
 			this.conn.close();
