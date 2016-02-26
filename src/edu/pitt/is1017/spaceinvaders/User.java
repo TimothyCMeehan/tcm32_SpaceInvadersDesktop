@@ -11,7 +11,7 @@ import javax.swing.JOptionPane;
  */
 public class User {
 	
-	//class's private prooerties
+	//class's private properties
 	private int userID;
 	private String lastName;
 	private String firstName;
@@ -27,8 +27,8 @@ public class User {
 	public User(int userID) {
 		
 		//create String that holds MySQL query using inputed email and password
-		String selectString = "SELECT * FROM users WHERE userID = '" 
-			+ userID + "';";
+		String selectString = "SELECT * FROM users WHERE userID = " 
+			+ userID + ";";
 		
 		//create a DbUtilities object
 		DbUtilities alienDB = new DbUtilities();
@@ -94,7 +94,8 @@ public class User {
 				this.loggedIn = false;
 				
 				//displays error message
-				JOptionPane.showMessageDialog(null, "Sorry, that email or password was not found");
+				JOptionPane.showMessageDialog(null, "Sorry, that email or password was not found"
+						+ "\nPlease re-enter your Email and Password");
 				
 			}//end of else block
 		} catch (SQLException e) {
@@ -129,11 +130,29 @@ public class User {
 		insertString += "VALUES ('" + this.lastName + "', '" + this.firstName
 				+ "', '" + this.email + "', MD5('" + this.password + "'));";
 		
+		//create String that holds MySQL query using inputed email and password to find out userID
+		String selectString = "SELECT userID FROM alieninvasion.users WHERE email = '" 
+						+ email + "' AND password = MD5('" + password + "');";
+		
 		//open new DbUtilities object
 		DbUtilities alienDB = new DbUtilities();
 		
 		//execute database query using insertString
 		alienDB.executeQuery(insertString);
+		
+		//create a ResultSet Object holding the results of the MySQL query written in selectString
+		ResultSet userResult = alienDB.getResultSet(selectString);
+		
+		try {
+			this.userID = userResult.getInt("userID");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//close connection with database
+		alienDB.closeConnection();
+		
 		
 		//System.out.println(insertString);
 		

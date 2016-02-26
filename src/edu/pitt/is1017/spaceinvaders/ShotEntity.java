@@ -12,6 +12,8 @@ public class ShotEntity extends Entity {
 	private Game game;
 	/** True if this shot has been "used", i.e. its hit something */
 	private boolean used = false;
+	//**new property** true if shot has hit an alien
+	private boolean aHit = false;
 	
 	/**
 	 * Create a new shot from the player
@@ -62,10 +64,16 @@ public class ShotEntity extends Entity {
 			// remove the affected entities
 			game.removeEntity(this);
 			game.removeEntity(other);
+			//if shot hits alien, set this property to true
+			this.aHit = true;
 			
 			// notify the game that the alien has been killed
 			game.notifyAlienKilled();
 			used = true;
 		}
+	}
+
+	public boolean isaHit() {
+		return aHit;
 	}
 }

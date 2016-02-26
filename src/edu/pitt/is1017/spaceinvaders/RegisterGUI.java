@@ -124,6 +124,19 @@ public class RegisterGUI {
 					//display message for successful registry
 					JOptionPane.showMessageDialog(null, "Successfully Registered!");
 					
+					//start new Thread for game launch
+					Thread launchTread = new Thread("Game launch thread"){
+						public void run(){
+							// Start the main game loop, note: this method will not
+							// return until the game has finished running. Hence we are
+							// using the actual main thread to run the game.
+							Game g =new Game(hero);
+							g.gameLoop();
+						}
+					};
+					
+					launchTread.start();
+					
 				}else{
 					
 					//display message alerting user to error in typing password

@@ -99,7 +99,31 @@ public class LoginGUI {
 				//call the constructor of user class and pass it the inputed email and password
 				User hero = new User(txtEmail.getText(),txtPassword.getText());
 				
-				//before starting game, use the getUserID method of the user class to verify a user was inputed
+				//check to make sure a valid user was entered
+				if(hero.getUserID()>0){
+					//make the LoginGUI invisible when the game starts
+					mainFrame.setVisible(false);
+				
+					//create new thread for game window
+					Thread launchTread = new Thread("Game launch thread"){
+						public void run(){
+						
+							//create a game object and start the game loop
+							Game g =new Game(hero);
+							g.gameLoop();
+							
+						}//end of run method
+					};//end of thread 
+				
+					//start the launch thread
+					launchTread.start();
+					
+				}//end of code block executed when user enters valid user ID
+				else{
+					//clear fields if email or password is not found
+					txtEmail.setText("");
+					txtPassword.setText("");
+				}
 				
 			}// end of action performed method
 		});// end event handler

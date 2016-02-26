@@ -62,11 +62,20 @@ public class Game extends Canvas {
 	private boolean firePressed = false;
 	/** True if game logic needs to be applied this loop, normally as a result of a game event */
 	private boolean logicRequiredThisLoop = false;
+	/** hold statistics on current game */
+	private ScoreTracker gameStats;
+	
+	private User hero;
 	
 	/**
 	 * Construct our game and set it running.
 	 */
-	public Game() {
+	public Game(User user) {
+		
+		this.hero = user;
+		//create a ScoreTracker object and pass it the current user
+		gameStats = new ScoreTracker(this.hero);
+		
 		// create a frame to contain our game
 		JFrame container = new JFrame("Space Invaders 101");
 		
@@ -96,6 +105,8 @@ public class Game extends Canvas {
 			}
 		});
 		
+		
+		
 		// add a key input system (defined below) to our canvas
 		// so we can respond to key pressed
 		addKeyListener(new KeyInputHandler());
@@ -108,7 +119,7 @@ public class Game extends Canvas {
 		createBufferStrategy(2);
 		strategy = getBufferStrategy();
 		
-		// initialise the entities in our game so there's something
+		// initialize the entities in our game so there's something
 		// to see at startup
 		initEntities();
 	}
@@ -118,7 +129,7 @@ public class Game extends Canvas {
 	 * create a new set.
 	 */
 	private void startGame() {
-		// clear out any existing entities and intialise a new set
+		// clear out any existing entities and initialize a new set
 		entities.clear();
 		initEntities();
 		
@@ -129,8 +140,8 @@ public class Game extends Canvas {
 	}
 	
 	/**
-	 * Initialise the starting state of the entities (ship and aliens). Each
-	 * entitiy will be added to the overall list of entities in the game.
+	 * Initialize the starting state of the entities (ship and aliens). Each
+	 * entity will be added to the overall list of entities in the game.
 	 */
 	private void initEntities() {
 		// create the player ship and place it roughly in the center of the screen
@@ -172,7 +183,9 @@ public class Game extends Canvas {
 	 */
 	public void notifyDeath() {
 		message = "Oh no! They got you, try again?";
-		waitingForKeyPress = true;
+		//call finish game method
+		finishGame();
+		
 	}
 	
 	/**
@@ -181,7 +194,22 @@ public class Game extends Canvas {
 	 */
 	public void notifyWin() {
 		message = "Well done! You Win!";
+		//call finish game method
+		finishGame();
+		
+	}
+	
+	public void finishGame() {
+		
+		//call recordFinalScore method of the ScoreTracker Class
+		this.gameStats.recordFinalScore();
+		
+		// new ScoreTracker created in case user wants to play again
+		this.gameStats = new ScoreTracker(hero);
+		
 		waitingForKeyPress = true;
+		
+		 
 	}
 	
 	/**
@@ -238,7 +266,7 @@ public class Game extends Canvas {
 	public void gameLoop() {
 		long lastLoopTime = System.currentTimeMillis();
 		
-		// keep looping round til the game ends
+		// keep looping round till the game ends
 		while (gameRunning) {
 			// work out how long its been since the last update, this
 			// will be used to calculate how far the entities should
@@ -283,6 +311,21 @@ public class Game extends Canvas {
 				}
 			}
 			
+			// check all entities marked for removal to see if they are shot entities
+			for (int i=0; i<removeList.size(); i++){
+				if(removeList.get(i) instanceof ShotEntity){
+					//create temp variable holding current shot entity of loop
+					ShotEntity deadShot = (ShotEntity) removeList.get(i);
+					if(deadShot.isaHit()){
+						//call scoreTracker with a hit
+						this.gameStats.recordScore(1);
+					}
+					else{
+						//call scoreTracker with a miss
+						this.gameStats.recordScore(-1);
+					}
+				}
+			}
 			// remove any entity that has been marked for clear up
 			entities.removeAll(removeList);
 			removeList.clear();
@@ -314,7 +357,7 @@ public class Game extends Canvas {
 			
 			// resolve the movement of the ship. First assume the ship 
 			// isn't moving. If either cursor key is pressed then
-			// update the movement appropraitely
+			// update the movement appropriately
 			ship.setHorizontalMovement(0);
 			
 			if ((leftPressed) && (!rightPressed)) {
@@ -408,13 +451,13 @@ public class Game extends Canvas {
 		 */
 		public void keyTyped(KeyEvent e) {
 			// if we're waiting for a "any key" type then
-			// check if we've recieved any recently. We may
+			// check if we've received any recently. We may
 			// have had a keyType() event from the user releasing
 			// the shoot or move keys, hence the use of the "pressCount"
 			// counter.
 			if (waitingForKeyPress) {
 				if (pressCount == 1) {
-					// since we've now recieved our key typed
+					// since we've now received our key typed
 					// event we can mark it as such and start 
 					// our new game
 					waitingForKeyPress = false;
@@ -438,8 +481,10 @@ public class Game extends Canvas {
 	 * loop.
 	 * 
 	 * @param argv The arguments that are passed into our game
+	
 	 */
-	public static void main(String argv[]) {
+	/*
+	public static void main(String[] args) {
 		Game g =new Game();
 
 		// Start the main game loop, note: this method will not
@@ -447,4 +492,5 @@ public class Game extends Canvas {
 		// using the actual main thread to run the game.
 		g.gameLoop();
 	}
+	*/
 }
